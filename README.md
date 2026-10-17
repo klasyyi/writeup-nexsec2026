@@ -1,4 +1,4 @@
-# NexSec 2026 CTF Writeups
+# NexSec 2026 CTF Writeups (I use Gemini to write this writeup)
 
 Repository containing writeups and solve scripts for **NexSec CTF 2026**.
 
