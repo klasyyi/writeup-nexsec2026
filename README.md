@@ -4,15 +4,15 @@ Repository containing writeups and solve scripts for **NexSec CTF 2026**.
 
 ## Solved Challenges
 
-| Category | Challenge | Points | Solves | Writeup | Reference |
-| :--- | :--- | :---: | :---: | :--- | :--- |
-| **Forensics** | Dead Drop Latte | 450 | 18 | [Writeup & Exploit](forensics/dead-drop-latte/) | [DeepSeek Session](https://chat.deepseek.com/share/0izrlmc9invir9zffr) |
-| **Forensics** | n8n | 450 | 8 | [Writeup & Exploit](forensics/n8n/) | [DeepSeek Session](https://chat.deepseek.com/share/jd8mnm2z53dzbu8k7x) |
-| **Crypto** | Mersenne Twister | 450 | 12 | [Writeup & Exploit](crypto/mersenne-twister/) | [DeepSeek Session](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf) |
-| **Crypto** | Mirror Image | 450 | 14 | [Writeup & Exploit](crypto/mirror-image/) | [DeepSeek Session](https://chat.deepseek.com/share/uk97mksa8d2tucubvz) |
-| **Reverse** | матрёшка (Matryoshka) | 450 | 12 | [Writeup & Exploit](reverse/matryoshka/) | [DeepSeek Session](https://chat.deepseek.com/share/pfw85puth4sur5t0sx) |
-| **Misc** | Antivist | - | - | [Writeup](misc/Antivist/) | [DeepSeek Session](https://chat.deepseek.com/share/80ksxx3a2gtqfhboj2) |
-| **Misc** | Neverland's Cave | - | - | [Writeup & Exploit](misc/neverlands-cave/) | [DeepSeek Session](https://chat.deepseek.com/share/2uv3561mo631dw4eha) |
+| Category | Challenge | Writeup | Reference |
+| :--- | :--- | :--- | :--- |
+| **Forensics** | Dead Drop Latte | [Writeup & Exploit](forensics/dead-drop-latte/) | [DeepSeek Session](https://chat.deepseek.com/share/0izrlmc9invir9zffr) |
+| **Forensics** | n8n | [Writeup & Exploit](forensics/n8n/) | [DeepSeek Session](https://chat.deepseek.com/share/jd8mnm2z53dzbu8k7x) |
+| **Crypto** | Mersenne Twister | [Writeup & Exploit](crypto/mersenne-twister/) | [DeepSeek Session](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf) |
+| **Crypto** | Mirror Image | [Writeup & Exploit](crypto/mirror-image/) | [DeepSeek Session](https://chat.deepseek.com/share/uk97mksa8d2tucubvz) |
+| **Reverse** | матрёшка (Matryoshka) | [Writeup & Exploit](reverse/matryoshka/) | [DeepSeek Session](https://chat.deepseek.com/share/pfw85puth4sur5t0sx) |
+| **Misc** | Antivist | [Writeup](misc/Antivist/) | [DeepSeek Session](https://chat.deepseek.com/share/80ksxx3a2gtqfhboj2) |
+| **Misc** | Neverland's Cave | [Writeup & Exploit](misc/neverlands-cave/) | [DeepSeek Session](https://chat.deepseek.com/share/2uv3561mo631dw4eha) |
 
 ---
 
