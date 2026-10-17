@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102d28">
+  <title>Neverland's Cave · A Neverland Adventure</title>
+  <style>
+    :root{--forest:#102d28;--forest-2:#1d493c;--leaf:#75a969;--cream:#faf5e8;--paper:#fffaf0;--gold:#efbc65;--ink:#244238;--muted:#718477;--line:#e8e6d6;--shadow:0 18px 55px rgba(25,57,44,.11)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f4e9;color:var(--ink);font:16px/1.5 "Trebuchet MS",Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}a{color:inherit}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #e3a94d;outline-offset:3px}.shell{max-width:1240px;margin:auto;padding:0 32px}
+    .hero{position:relative;overflow:hidden;min-height:585px;background:radial-gradient(circle at 71% 42%,#34614e 0,#183a32 33%,#102b28 76%);color:#fff9e7}.hero:after{content:"";position:absolute;z-index:1;bottom:-1px;left:0;right:0;height:70px;background:#f5f4e9;clip-path:polygon(0 69%,7% 61%,14% 69%,22% 49%,31% 66%,39% 56%,48% 72%,58% 56%,67% 67%,75% 52%,84% 68%,92% 57%,100% 68%,100% 100%,0 100%)}
+    .topbar{position:relative;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:26px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:#fff}.brand-mark{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(244,225,169,.65);border-radius:50%;color:var(--gold);font-size:23px;transform:rotate(-18deg)}.brand strong{display:block;font-family:Georgia,serif;font-size:22px;letter-spacing:-.05em;line-height:1}.brand small{display:block;color:#c5d8c6;font-size:10px;letter-spacing:.22em;text-transform:uppercase;margin-top:5px}.nav{display:flex;align-items:center;gap:31px}.nav a{text-decoration:none;color:#d5e3d2;font-size:13px;font-weight:700}.nav a:hover{color:#fff}.nav .nav-pill{padding:11px 17px;border-radius:100px;border:1px solid rgba(226,238,216,.4);color:#fff}
+    .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:46% 54%;align-items:center;min-height:490px;padding-bottom:45px}.hero-copy{padding:36px 0 25px}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:#f2ca82;font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}.eyebrow:before{content:"✦";font-size:18px;line-height:0}.hero h1{font-family:Georgia,serif;font-size:clamp(56px,6.2vw,90px);line-height:.95;letter-spacing:-.075em;font-weight:500;margin:18px 0 23px;max-width:570px}.hero h1 em{display:block;color:#f5bd68;font-weight:400}.hero-copy p{max-width:425px;margin:0;color:#d0dfd2;font-size:16px;line-height:1.75}.hero-actions{display:flex;flex-wrap:wrap;gap:13px;margin-top:32px}.button{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:100px;border:0;padding:14px 23px;font-size:14px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s}.button:hover{transform:translateY(-2px)}.button-gold{background:var(--gold);color:#263c2e;box-shadow:0 8px 24px rgba(11,28,21,.15)}.button-ghost{color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.3)}.hero-note{display:flex;align-items:center;gap:10px;color:#b9d0bc;margin-top:34px;font-size:12px}.hero-note span{width:27px;height:1px;background:var(--gold)}
+    .hero-art{align-self:stretch;position:relative;min-height:450px}.hero-art svg{position:absolute;inset:0;width:112%;height:100%;left:-6%;overflow:visible}.star{animation:twinkle 3s ease-in-out infinite}.star:nth-child(2n){animation-delay:1s}@keyframes twinkle{50%{opacity:.25;transform:scale(.75)}}
+    main{position:relative;z-index:3}.intro{display:flex;align-items:end;justify-content:space-between;gap:24px;padding:36px 0 24px}.kicker{color:#a47739;text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:.2em}.intro h2,.console h2{font-family:Georgia,serif;font-size:clamp(30px,3vw,43px);line-height:1.12;font-weight:500;letter-spacing:-.045em;margin:8px 0 0}.intro p{max-width:340px;color:var(--muted);font-size:14px;margin:0 0 4px}.journey{position:relative;margin-bottom:48px}.trail-line{position:absolute;top:72px;left:12.5%;right:12.5%;height:3px;border-top:3px dashed #c9d3b9}.trail-progress{position:absolute;top:72px;left:12.5%;width:0;height:3px;background:#8cac7a;transition:width .6s}.traveler{position:absolute;z-index:2;top:47px;left:12.5%;width:48px;height:48px;transform:translateX(-50%);transition:left .65s ease;filter:drop-shadow(0 5px 4px rgba(26,70,44,.2));pointer-events:none}.trail-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:17px;position:relative;padding-top:117px}.cave-card{position:relative;min-height:225px;text-align:left;padding:24px 21px 20px;border:1px solid #e7e7d8;background:var(--paper);border-radius:20px;box-shadow:0 8px 30px rgba(27,49,35,.04);color:var(--ink);transition:transform .2s,border-color .2s,box-shadow .2s;width:100%}.cave-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}.cave-card.active{border-color:#b5ca95;box-shadow:0 15px 35px rgba(72,116,72,.13)}.cave-card.locked{opacity:.75}.cave-node{position:absolute;top:-67px;left:50%;transform:translateX(-50%);width:52px;height:52px;background:#ecf0df;border:5px solid #f5f4e9;border-radius:50%;display:grid;place-items:center;color:#618467;font-size:21px;box-shadow:0 3px 0 rgba(85,125,70,.12)}.cave-card.active .cave-node,.cave-card.done .cave-node{background:#87ab71;color:#fff}.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.stage{font-size:10px;letter-spacing:.15em;font-weight:900;text-transform:uppercase;color:#889487}.status{font-size:10px;border-radius:100px;padding:5px 9px;background:#f0f1e6;color:#70836f;font-weight:800}.cave-card.active .status{background:#e2edd8;color:#4a764c}.cave-card.done .status{background:#e5efd9;color:#517c4f}.cave-card h3{font-family:Georgia,serif;font-size:24px;letter-spacing:-.04em;font-weight:500;margin:0 0 8px}.cave-card p{color:#798a7c;font-size:12px;line-height:1.6;margin:0;min-height:58px}.reward{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:17px;padding-top:14px;color:#517b55;font-size:12px;font-weight:800}.reward-icon{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#e5eedb;font-size:14px}.cave-card.locked .reward{color:#879488}
+    .lower{display:grid;grid-template-columns:1.08fr .92fr;gap:24px;padding-bottom:76px}.panel{border:1px solid #e9e7d9;background:var(--paper);border-radius:24px;box-shadow:0 8px 28px rgba(23,50,35,.035)}.adventure{padding:29px 32px 31px;min-height:310px}.panel-label{color:#a47739;text-transform:uppercase;letter-spacing:.18em;font-size:10px;font-weight:900}.adventure h2{font:500 31px/1.14 Georgia,serif;letter-spacing:-.04em;margin:12px 0}.adventure p{max-width:490px;color:#6f8274;font-size:14px;line-height:1.7;margin:0 0 22px}.inventory{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px}.item{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:100px;background:#f1f2e8;color:#a3aea0;font-size:11px;font-weight:800}.item.owned{background:#e2edd8;color:#47764d}.adventure-action{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.subtle{font-size:11px;color:#91a090}.console{padding:29px 31px;background:#193d35;color:#fff9e9;border-color:#295447;min-height:310px}.console .panel-label{color:#f2c77c}.console h2{font-size:30px;margin:10px 0 9px}.console p{color:#bbd0be;font-size:13px;line-height:1.6;margin:0 0 19px}.search{display:flex;gap:8px}.search input{width:100%;min-width:0;border:1px solid #57816a;background:#285348;color:#fff;padding:12px 14px;border-radius:11px;font-size:12px;outline:none}.search input::placeholder{color:#b2c8b8}.search button{flex:none;border:0;background:var(--gold);border-radius:11px;padding:0 16px;color:#2b4334;font-size:12px;font-weight:900}.result{display:none;max-height:165px;overflow:auto;margin:14px 0 0;padding:14px;background:#102e29;border:1px solid #416b58;border-radius:11px;color:#dcebdc;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}.result.visible{display:block}.console-links{display:flex;align-items:center;gap:18px;margin-top:15px}.console-links a,.console-links button{color:#d4e8d1;font-size:11px;font-weight:800;text-decoration:underline;text-underline-offset:3px;background:none;padding:0;border:0}.console-links a:hover,.console-links button:hover{color:#fff}.footer{border-top:1px solid #e1e5d8;color:#849588;font-size:11px;padding:18px 0 24px}.footer .shell{display:flex;justify-content:space-between;gap:10px}
+    @media(max-width:900px){.hero-grid{grid-template-columns:1fr 1fr}.hero-art svg{width:135%;left:-15%}.trail-cards{gap:10px}.cave-card{padding:20px 15px}.cave-card h3{font-size:20px}.lower{gap:15px}.adventure,.console{padding:24px}}
+    @media(max-width:700px){.shell{padding:0 20px}.hero{min-height:auto}.topbar{padding-top:18px}.nav a:not(.nav-pill){display:none}.nav .nav-pill{padding:9px 12px;font-size:11px}.hero-grid{display:block;padding-bottom:100px;min-height:0}.hero-copy{padding:54px 0 0}.hero h1{font-size:clamp(53px,13vw,76px)}.hero-art{height:275px;min-height:0;margin-top:-15px}.hero-art svg{width:100%;left:0}.intro{display:block;padding-top:20px}.intro p{margin-top:13px}.journey{margin-bottom:30px}.trail-line,.trail-progress,.traveler{display:none}.trail-cards{grid-template-columns:repeat(2,1fr);padding-top:0;gap:12px}.cave-card{min-height:215px}.cave-node{position:static;transform:none;width:34px;height:34px;border:0;margin-bottom:13px;font-size:16px}.card-top{margin-bottom:8px}.lower{grid-template-columns:1fr;padding-bottom:45px}.footer .shell{display:block}.footer span{display:block;margin-bottom:4px}}
+    @media(max-width:410px){.trail-cards{grid-template-columns:1fr}.cave-card{min-height:0}.cave-card p{min-height:0}.hero-art{height:220px}.search{display:block}.search button{width:100%;padding:11px;margin-top:8px}}
+    .lower{grid-template-columns:.72fr 1.28fr;align-items:start}.adventure{min-height:0}.mission-box{display:flex;align-items:flex-start;gap:12px;padding:15px 16px;margin:23px 0;border:1px solid #d9e5d1;background:#eff4e7;border-radius:13px;color:#4e7152;font-size:12px;line-height:1.55}.mission-box strong{display:block;color:#305c3b;font-size:13px;margin-bottom:2px}.mission-symbol{font-size:20px;line-height:1}.console{border:2px solid #d5a659;box-shadow:0 16px 45px rgba(27,58,43,.16);min-height:0}.console .panel-label{display:inline-flex;gap:8px;align-items:center;padding:7px 10px;border-radius:100px;background:#315a48;color:#f5ce83}.console .panel-label:before{content:"●";font-size:8px;color:#f0c369}.console h2{font-size:34px}.console p{max-width:570px}.request-form{display:grid;gap:14px;margin-top:22px}.field-label{display:block;color:#e7efdf;font-size:11px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;margin:0 0 7px}.method-row{display:grid;grid-template-columns:130px 1fr;gap:10px}.request-form input,.request-form select,.request-form textarea{width:100%;border:1px solid #6d8c77;background:#102f2a;color:#fff;padding:12px 13px;border-radius:10px;font:13px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.request-form input::placeholder,.request-form textarea::placeholder{color:#9bb5a5}.request-form textarea{resize:vertical;min-height:72px}.request-form input:focus,.request-form select:focus,.request-form textarea:focus{border-color:#f1c16e;box-shadow:0 0 0 2px rgba(241,193,110,.18)}.request-form select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#edc47d 50%),linear-gradient(135deg,#edc47d 50%,transparent 50%);background-position:calc(100% - 19px) 19px,calc(100% - 13px) 19px;background-size:6px 6px;background-repeat:no-repeat}.request-form .send-button{width:100%;border:0;border-radius:11px;padding:13px 18px;background:var(--gold);color:#263d30;font-size:13px;font-weight:900;box-shadow:0 7px 18px rgba(0,0,0,.14)}.request-form .send-button:hover{background:#ffd187}.request-help{color:#9dbda9;font-size:11px;line-height:1.5;margin-top:5px}.response-head{display:none;align-items:center;justify-content:space-between;gap:10px;margin:21px 0 7px}.response-head.visible{display:flex}.response-head .response-heading{display:block;margin:0;color:#eac586;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.copy-button{border:1px solid #6d8c77;background:#1c4a3d;color:#f5ce83;border-radius:9px;padding:6px 12px;font-size:11px;font-weight:900;letter-spacing:.04em;cursor:pointer}.copy-button:hover{background:#255a4a}.copy-button.copied{border-color:#8cac7a;color:#dff0cf}.result{max-height:260px;margin:0}.console-links{border-top:1px solid #466b59;padding-top:16px;margin-top:19px}.cave-card.locked{opacity:1}.cave-card .status{background:#f0f1e6;color:#70836f}.cave-card.active .status{background:#e2edd8;color:#4a764c}
+    .lower{grid-template-columns:1fr 1.18fr;align-items:stretch}.adventure{display:flex;flex-direction:column;min-height:590px}.journal-scene{position:relative;flex:1;min-height:180px;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 70% 31%,#cfdbac 0,#a9c19a 38%,#668f73 100%);margin:0 0 20px}.journal-scene svg{display:block;width:100%;height:100%;min-height:180px}.adventure .mission-box{margin:0 0 20px}.adventure-action{margin-top:auto}
+    @media(max-width:900px){.lower{grid-template-columns:.95fr 1.05fr}.adventure{min-height:600px}}
+    @media(max-width:700px){.lower{grid-template-columns:1fr}.adventure{min-height:0}.journal-scene{flex:none;height:190px}.method-row{grid-template-columns:115px 1fr}}
+    @media(max-width:410px){.method-row{grid-template-columns:1fr}}
+    .adventure{min-height:0}.journal-scene,.journal-scene svg{min-height:150px}.console{padding:24px 27px}.console h2{font-size:29px;margin:8px 0 5px}.console p{margin:0 0 10px}.request-form{gap:10px;margin-top:12px}.field-label{margin-bottom:5px}.request-extras{display:grid;grid-template-columns:1fr 1fr;gap:10px}.request-form textarea{min-height:66px}.request-form .send-button{padding:11px 15px}.console-links{margin-top:13px;padding-top:12px}.result{max-height:190px}
+    .hero h1{font-size:clamp(54px,5.8vw,80px)}
+    @media(max-width:700px){.adventure{min-height:0}.journal-scene{height:170px}.request-extras{grid-template-columns:1fr}}
+    .lower{align-items:start}.adventure{height:auto;min-height:0;padding:24px 27px}.adventure h2{margin:8px 0}.adventure p{margin-bottom:14px}.journal-scene{flex:none;height:132px;min-height:0;margin-bottom:15px}.journal-scene svg{height:132px;min-height:0}.adventure .mission-box{padding:11px 13px;margin-bottom:15px}.adventure-action{margin-top:0}
+    @media(max-width:700px){.journal-scene,.journal-scene svg{height:150px}}
+    .lower{align-items:stretch}.journal-scene{flex:1;height:auto;min-height:132px}.journal-scene svg{height:100%;min-height:132px}.console{display:flex;flex-direction:column}.console .request-form{flex:1;align-content:space-between}.console-links{margin-top:16px}
+    @media(max-width:700px){.journal-scene{flex:none;height:150px}.journal-scene svg{height:150px}.console .request-form{flex:none;align-content:start}}
+    .request-extras{grid-template-columns:1fr}.console .request-form{flex:none;align-content:start}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    .request-advanced{border:1px solid #466b59;background:#123029;border-radius:11px;padding:11px 13px}
+    .request-advanced summary{cursor:pointer;color:#d4e8d1;font-size:11px;font-weight:800;letter-spacing:.04em;list-style:none}
+    .request-advanced summary::-webkit-details-marker{display:none}
+    .request-advanced summary:before{content:"▸ ";color:#f1c16e}
+    .request-advanced[open] summary:before{content:"▾ "}
+    .request-advanced .request-extras{margin-top:11px}
+  </style>
+</head>
+<body>
+  <header class="hero" id="top">
+    <div class="shell">
+      <div class="topbar">
+        <a class="brand" href="#top" aria-label="Neverland Trail home"><span class="brand-mark">✦</span><span><strong>the neverland trail</strong><small>A forest adventure</small></span></a>
+        <nav class="nav" aria-label="Main navigation"><a href="#journey">The trail</a><a href="#lookout">Looking glass</a><a class="nav-pill" href="#journey">Follow Peter ↗</a></nav>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Once upon a moonlit evening</span>
+          <h1>Follow the glow.<em>Find the cave.</em></h1>
+          <p>Peter Pan follows a trail of fireflies through the wildwood. Each cave holds a whisper, a wonder, or a clue. Somewhere beyond the trees, one secret waits to be found.</p>
+          <div class="hero-actions"><a class="button button-gold" href="#journey">Follow Peter's trail <span aria-hidden="true">↗</span></a><a class="button button-ghost" href="#lookout">Open the looking glass <span aria-hidden="true">⌕</span></a></div>
+          <div class="hero-note"><span></span> Wander the woods · Explore the caves · Find the secret</div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 650 490" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="glow"><stop stop-color="#d9ca80" stop-opacity=".27"/><stop offset="1" stop-color="#d9ca80" stop-opacity="0"/></radialGradient><linearGradient id="cave" x2="0" y2="1"><stop stop-color="#3f6650"/><stop offset="1" stop-color="#1f4236"/></linearGradient><linearGradient id="hill" x2="0" y2="1"><stop stop-color="#416b50"/><stop offset="1" stop-color="#193f33"/></linearGradient></defs>
+            <circle cx="430" cy="215" r="205" fill="url(#glow)"/><path d="M0 384Q115 329 211 366T432 357T650 361V490H0Z" fill="#315c43"/><path d="M0 425Q165 375 276 418T650 398V490H0Z" fill="url(#hill)"/>
+            <g fill="#234838"><path d="M5 390V170l-39 76 33-15-42 86 38-15-57 88z"/><path d="M66 401V140l-47 92 41-16-48 90 44-16-50 111z"/><path d="M594 400V160l-44 78 36-12-47 91 43-16-52 99z"/><path d="M650 393V122l-51 103 43-16-51 95 46-19-51 108z"/></g><g fill="#173c34"><path d="M30 430V223l-40 76 34-12-39 82 39-15-37 76z"/><path d="M628 425V244l-35 67 30-12-36 79 36-15-34 62z"/></g>
+            <path d="M368 416c0-109 32-193 112-193 81 0 113 84 113 193Z" fill="#132d2b" stroke="#6b825b" stroke-width="13"/><path d="M397 416c4-90 28-158 83-158s79 68 84 158Z" fill="url(#cave)"/><path d="M432 416c1-71 14-113 48-113 33 0 47 42 48 113Z" fill="#0f2727"/><path d="M473 322v75m-26-37h52" stroke="#c99d5b" stroke-opacity=".35" stroke-width="2"/>
+            <g fill="#e8ca7b"><circle cx="480" cy="330" r="4"/><circle cx="488" cy="349" r="2"/><circle cx="466" cy="354" r="2"/></g><g fill="#6b986a"><ellipse cx="388" cy="409" rx="52" ry="15"/><ellipse cx="579" cy="412" rx="45" ry="16"/></g>
+            <path d="M76 438Q235 373 385 439T650 432" fill="none" stroke="#d0ac6d" stroke-opacity=".56" stroke-width="7" stroke-linecap="round" stroke-dasharray="2 14"/>
+            <g transform="translate(243 250)"><ellipse cx="48" cy="174" rx="44" ry="9" fill="#122c27" opacity=".45"/><path d="M42 64 12 120l13 7 33-43Z" fill="#e7c39a"/><path d="m55 75 44 44-12 10-49-37Z" fill="#e7c39a"/><path d="m34 112-8 57 15 1 15-47Zm30 2 19 55 15-4-12-63Z" fill="#76543c"/><path d="m22 168-12 11 32 1 1-10Zm61-2 2 16 31-2-18-14Z" fill="#593f31"/><path d="m43 47-19 19 4 53 17 16 43-19-15-56Z" fill="#70a15d"/><path d="m28 114 15 19 19-12 20 8 6-16Z" fill="#4d7d4c"/><path d="M49 34c-5-24 6-38 23-35 20 4 20 31 8 44l-15 12Z" fill="#e8bd8f"/><path d="M49 26c-12-28 10-43 30-34 11 5 15 17 11 31L77 7 56 22Z" fill="#6d4931"/><path d="M23 14Q59-27 104-1L76 17Z" fill="#6ba15a"/><path d="M71 3 123-24l-27 32Z" fill="#78a85e"/><path d="M99-9q29-20 32-34-21 7-35 35" fill="#e3b269"/><circle cx="82" cy="29" r="2" fill="#45372c"/></g>
+            <g fill="#f5d78d"><path class="star" d="m160 100 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/><path class="star" d="m352 86 2 6 6 2-6 2-2 6-2-6-6-2 6-2Z"/><path class="star" d="m546 127 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><circle class="star" cx="218" cy="174" r="3"/><circle class="star" cx="379" cy="173" r="3"/><circle class="star" cx="113" cy="262" r="2"/><circle class="star" cx="551" cy="70" r="2"/></g>
+            <g fill="#9bc378" opacity=".8"><path d="M121 418q-12-21-25-20 15 1 23 26Zm10 2q4-26 18-29-14 12-12 31Zm469-3q-9-18-21-20 15 9 15 27Z"/></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="intro" id="journey" aria-labelledby="journey-title"><div><div class="kicker">01 / The forest trail</div><h2 id="journey-title">Which cave holds the flag?</h2></div><p>These cave sketches set the scene. Follow real clues from the lookout to identify the right cave.</p></section>
+    <section class="journey" aria-label="Cave trail"><div class="trail-line" aria-hidden="true"></div><div class="trail-progress" id="trail-progress" aria-hidden="true"></div><svg class="traveler" id="traveler" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#e8f0d8" stroke="#78a66c" stroke-width="2"/><path d="m12 21 20-11 7 11-20 7Z" fill="#68a156"/><path d="m29 13 11-9-5 12Z" fill="#e7b76c"/><circle cx="24" cy="28" r="8" fill="#dcb38c"/><path d="M17 38q7-9 15 0" fill="#578f52"/></svg>
+      <div class="trail-cards" id="trail-cards">
+        <button class="cave-card active" type="button" data-cave="0" aria-pressed="true"><span class="cave-node">✦</span><span class="card-top"><span class="stage">Cave sketch 01</span><span class="status">Selected</span></span><h3>Moss Cave</h3><p>Quiet, familiar, and easy to find. The first cave is rarely the whole story.</p><span class="reward"><span class="reward-icon">⌕</span> Look for a trace</span></button>
+        <button class="cave-card" type="button" data-cave="1" aria-pressed="false"><span class="cave-node">✦</span><span class="card-top"><span class="stage">Cave sketch 02</span><span class="status">Explore</span></span><h3>Echo Cave</h3><p>Footsteps sound different here. A clue might lead further into the forest.</p><span class="reward"><span class="reward-icon">◇</span> Follow an echo</span></button>
+        <button class="cave-card" type="button" data-cave="2" aria-pressed="false"><span class="cave-node">✦</span><span class="card-top"><span class="stage">Cave sketch 03</span><span class="status">Explore</span></span><h3>Cloud Cave</h3><p>Mist curls around the entrance. It takes the right vantage point to see inside.</p><span class="reward"><span class="reward-icon">☁</span> Find a vantage point</span></button>
+        <button class="cave-card" type="button" data-cave="3" aria-pressed="false"><span class="cave-node">⌁</span><span class="card-top"><span class="stage">Cave sketch 04</span><span class="status">Explore</span></span><h3>Unmarked Cave</h3><p>One cave somewhere in this forest holds what Peter came to find.</p><span class="reward"><span class="reward-icon">◈</span> Spot the right cave</span></button>
+      </div>
+    </section>
+    <section class="lower" aria-label="Adventure tools">
+      <div class="panel adventure" aria-live="polite">
+        <div class="panel-label" id="chapter-label">Cave journal · Sketch 01</div>
+        <h2 id="chapter-title">Moss Cave</h2>
+        <p id="chapter-text">Peter's map shows many possible hideouts. This first drawing is only a sketch; careful explorers compare what they find along the trail.</p>
+        <div class="journal-scene" aria-hidden="true">
+          <svg viewBox="0 0 500 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 155Q85 120 170 152T345 140T500 150V240H0Z" fill="#658e6c"/><path d="M0 184Q110 146 206 182T500 164V240H0Z" fill="#3d765b"/>
+            <path d="M55 180V31l-33 66 27-13-32 65 30-13-31 44Zm39 15V9L51 92l36-15-38 76 35-14-31 56Zm374-13V26l-33 67 26-13-29 63 26-12-26 51Zm42 20V47l-34 70 29-12-34 69 28-12-24 40Z" fill="#285c4e"/>
+            <path d="M0 218Q109 178 230 208T500 199V240H0Z" fill="#255b49"/>
+            <path d="M287 198c0-63 29-105 81-105 54 0 84 42 84 105Z" fill="#284b43" stroke="#638766" stroke-width="8"/><path d="M320 198c2-44 19-74 48-74s46 30 49 74Z" fill="#132e2e"/><path d="M344 197c0-23 8-41 24-41 17 0 25 18 25 41Z" fill="#081f24"/>
+            <path d="M72 221Q169 183 267 219T477 215" fill="none" stroke="#d6bf82" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 12"/>
+            <g transform="translate(180 132)"><path d="m24 48-16 31 10 5 18-29Zm16 4 21 30 10-7-23-34Z" fill="#e1b58b"/><path d="m20 77-7 42 11 2 14-36Zm28-2 13 45 12-4-11-45Z" fill="#6b4d3c"/><path d="M17 34 8 62l10 33 43-4 4-35-21-26Z" fill="#4f8753"/><circle cx="38" cy="22" r="19" fill="#e5bb8e"/><path d="M17 19Q20-7 46 0L57 23 42 10Z" fill="#624831"/><path d="M5 11Q30-15 65 7L37 20Z" fill="#5e9c55"/><path d="m51 4 28-21-14 24Z" fill="#efc678"/></g>
+            <g fill="#f2d689"><path d="m240 49 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><circle cx="285" cy="72" r="3"/><circle cx="427" cy="59" r="3"/><circle cx="143" cy="47" r="2"/><circle cx="464" cy="100" r="2"/></g>
+          </svg>
+        </div>
+        <div class="mission-box"><span class="mission-symbol" aria-hidden="true">◈</span><span><strong>Your objective</strong>Spot the right cave and retrieve the flag inside it. The cave sketches set the scene; your discoveries will guide the way.</span></div>
+        <div class="adventure-action"><a class="button button-gold" href="#lookout">Open cave preview <span aria-hidden="true">→</span></a></div>
+      </div>
+      <div class="panel console" id="lookout">
+        <div class="panel-label">The looking glass</div>
+        <h2>Cave preview</h2>
+        <p>Enter an address and take a closer look.</p>
+        <form class="request-form" id="fetch-form">
+          <div class="method-row">
+            <div><label class="field-label" for="method-input">Target method</label><select id="method-input" name="method"><option value="GET">GET</option><option value="POST">POST</option><option value="PUT">PUT</option><option value="DELETE">DELETE</option></select></div>
+            <div><label class="field-label" for="url-input">Address the pod should fetch</label><input id="url-input" name="url" type="text" autocomplete="off" spellcheck="false" required></div>
+          </div>
+          <details class="request-advanced">
+            <summary>Advanced · headers &amp; body (optional)</summary>
+            <div class="request-extras">
+              <div><label class="field-label" for="headers-input">Headers · JSON</label><textarea id="headers-input" name="headers" rows="2" spellcheck="false" placeholder='{"Name": "value"}'></textarea></div>
+              <div><label class="field-label" for="body-input">Body</label><textarea id="body-input" name="body" rows="2" spellcheck="false" placeholder="Sent to the address for POST/PUT"></textarea></div>
+            </div>
+          </details>
+          <button class="send-button" type="submit">Preview address ↗</button>
+        </form>
+        <div class="response-head" id="response-head"><span class="response-heading" id="response-heading">Preview result</span><button class="copy-button" id="copy-result" type="button">Copy</button></div>
+        <pre class="result" id="fetch-result" role="status" aria-live="polite"></pre>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="shell"><span>✦ Neverland's Cave · An adventure through the wildwood</span><span>Keep your eyes open. Magic hides in unexpected places.</span></div></footer>
+  <script>
+    (() => {
+      const caves = [
+        {label:'Cave journal · Sketch 01',title:'Moss Cave',text:"Peter's map shows many possible hideouts. This first drawing is only a sketch; careful explorers compare what they find along the trail."},
+        {label:'Cave journal · Sketch 02',title:'Echo Cave',text:'An echo may sound convincing, but it is only a clue. Keep following real responses until the route becomes clear.'},
+        {label:'Cave journal · Sketch 03',title:'Cloud Cave',text:'From the right vantage point, the cloud may reveal more than a traveler can see from the forest floor.'},
+        {label:'Cave journal · Sketch 04',title:'Unmarked Cave',text:'The right cave has no label on this map. Discover its true name through the challenge, then retrieve the flag inside.'}
+      ];
+      const cards = [...document.querySelectorAll('.cave-card')];
+      const result = document.getElementById('fetch-result');
+      const responseHead = document.getElementById('response-head');
+      const copyButton = document.getElementById('copy-result');
+      let lastResult = '';
+      let current = 0;
+      function showResult(value){
+        lastResult = value;
+        result.textContent = value;
+        result.classList.add('visible');
+        responseHead.classList.add('visible');
+        copyButton.classList.remove('copied');
+        copyButton.textContent = 'Copy';
+      }
+      copyButton.addEventListener('click', async () => {
+        if (!lastResult) return;
+        const settle = (text, cls) => {
+          copyButton.textContent = text;
+          copyButton.classList.toggle('copied', !!cls);
+          setTimeout(() => { copyButton.textContent = 'Copy'; copyButton.classList.remove('copied'); }, 1600);
+        };
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(lastResult);
+          } else {
+            const area = document.createElement('textarea');
+            area.value = lastResult;
+            area.style.position = 'fixed';
+            area.style.opacity = '0';
+            document.body.appendChild(area);
+            area.select();
+            document.execCommand('copy');
+            document.body.removeChild(area);
+          }
+          settle('Copied ✓', true);
+        } catch (_) {
+          settle('Copy failed', false);
+        }
+      });
+      function render(){
+        cards.forEach((card,index)=>{ const active=index===current; card.classList.toggle('active',active); card.setAttribute('aria-pressed',String(active)); card.querySelector('.status').textContent=active?'Selected':'Explore'; });
+        document.getElementById('chapter-label').textContent=caves[current].label;
+        document.getElementById('chapter-title').textContent=caves[current].title;
+        document.getElementById('chapter-text').textContent=caves[current].text;
+        document.getElementById('traveler').style.left=`${12.5+current*25}%`;
+        document.getElementById('trail-progress').style.width=`${current*25}%`;
+      }
+      cards.forEach((card,index)=>card.addEventListener('click',()=>{ current=index; render(); document.querySelector('.adventure').scrollIntoView({behavior:'smooth',block:'center'}); }));
+      document.getElementById('fetch-form').addEventListener('submit',async event=>{
+        event.preventDefault();
+        const url=document.getElementById('url-input').value.trim();
+        const method=document.getElementById('method-input').value;
+        const headerText=document.getElementById('headers-input').value.trim();
+        const body=document.getElementById('body-input').value;
+        if(!url)return;
+        let headers={};
+        if(headerText){
+          try { headers=JSON.parse(headerText); }
+          catch (_) { showResult('Headers must be a valid JSON object.'); return; }
+          if(!headers || Array.isArray(headers) || typeof headers!=='object' || Object.values(headers).some(value=>typeof value!=='string')){ showResult('Headers must be a JSON object with string values.'); return; }
+        }
+        const payload={url,method,headers};
+        if(body || method==='POST' || method==='PUT')payload.body=body;
+        const submitButton=event.currentTarget.querySelector('button[type="submit"]');
+        submitButton.disabled=true;
+        showResult('The lookout is scouting…');
+        try{
+          const response=await fetch('/api/fetch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          const data=await response.json();
+          showResult(JSON.stringify(data,null,2));
+        }catch(error){showResult('The lookout could not fetch this address: '+error.message);}
+        finally{submitButton.disabled=false;}
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
