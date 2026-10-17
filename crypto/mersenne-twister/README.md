@@ -405,12 +405,3 @@ Secret: nexsec26{w0w_y0u_already_kn0w_Mersenne_Twister_nice_0fed2f1a9dd2c3c276cc
 
 ### Final Flag:
 > `nexsec26{w0w_y0u_already_kn0w_Mersenne_Twister_nice_0fed2f1a9dd2c3c276cc24a2461c377486ca88acce79ef488023ce18c5abf4c4}`
-
----
-
-## 6. Key Takeaways
-
-1. **MT19937 is Not Cryptographically Secure:**
-   Mersenne Twister is designed for statistical simulation, not cryptography. Truncated outputs can be modeled as linear systems over GF(2) and solved in seconds with Z3. For security-sensitive applications, always use `secrets.token_bytes()`.
-2. **Implementation Details Matter:**
-   Looking into CPython's source code was what solved the challenge. While `random_seed` hashes large seeds with SHA-512, it appends the raw seed at the end of the key array (`key[16..17]`), completely bypassing the one-way hash.
