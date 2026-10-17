@@ -2,7 +2,7 @@
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
 > **DeepSeek Chat Session:** [https://chat.deepseek.com/share/80ksxx3a2gtqfhboj2](https://chat.deepseek.com/share/80ksxx3a2gtqfhboj2)  
-> **Category:** Misc (AI agent security)
+> **Category:** Misc
 
 ---
 
