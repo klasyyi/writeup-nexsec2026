@@ -12,10 +12,10 @@ In this challenge, we are given a Python script running on a remote server that 
 
 Standard tools like `randcrack` fail because we only receive 16-bit truncated outputs across two state cycles. Working through the challenge with DeepSeek (see the [chat transcript](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf)), we developed an exploit chain:
 
-1. **Z3 State Recovery ($S_1$):** Because MT19937 tempering and twisting are bitwise linear, Z3 solves the internal state for the first generation cycle in ~13 seconds.
+1. **Z3 State Recovery (S1):** Because MT19937 tempering and twisting are bitwise linear, Z3 solves the internal state for the first generation cycle in ~13 seconds.
 2. **Bypassing SHA-512:** While CPython hashes seeds with SHA-512, inspecting `_randommodule.c` reveals that it appends the raw 64-bit seed directly at `key[16]` and `key[17]`.
-3. **The In-Place Twist Trick:** Instead of running into `unsat` errors with a second Z3 solver, we exploit CPython's in-place twist: for indices $k \in [228, 341]$, $S_1[k] \oplus S_1[k - 227]$ gives the twist function $f(y)$ using only values we already solved.
-4. **Single-Line Inversion & Bit Stitching:** Because bit 31 of MT19937's matrix constant `0x9908B0DF` is 1, $f(y)$ is inverted directly in one line. Stitching adjacent $y$ values reconstructs $S_0[229..341]$.
+3. **The In-Place Twist Trick:** Instead of running into `unsat` errors with a second Z3 solver, we exploit CPython's in-place twist: for indices `k` in `[228, 341]`, `S1[k] ^ S1[k - 227]` gives the twist function `f(y)` using only values we already solved.
+4. **Single-Line Inversion & Bit Stitching:** Because bit 31 of MT19937's matrix constant `0x9908B0DF` is 1, `f(y)` is inverted directly in one line. Stitching adjacent `y` values reconstructs `S0[229..341]`.
 5. **Reversing `init_by_array`:** We reverse both initialization loops in plain Python in under a millisecond, recover the seed, and grab the flag.
 
 ---
@@ -70,7 +70,7 @@ for _ in range(3):
 - Each value is truncated: only `x >> 16` is leaked.
 - An MT19937 state is 624 32-bit words (19,968 bits).
 - We receive `966 * 16 = 15,456` bits total.
-- Since 966 is greater than 624, the generator produces 623 outputs from State 1 ($S_1$) and twists in-place to State 2 ($S_2$) to produce the remaining 343 outputs.
+- Since 966 is greater than 624, the generator produces 623 outputs from State 1 (`S1`) and twists in-place to State 2 (`S2`) to produce the remaining 343 outputs.
 
 ---
 
@@ -96,23 +96,23 @@ This was the first breakthrough: CPython's key buffer has 18 words. Words 0 to 1
 
 ---
 
-### 2. Solving State 1 ($S_1$) with Z3
+### 2. Solving State 1 (S1) with Z3
 Because MT19937 tempering and twisting are bitwise linear (shifts and XORs), we can model the generator in Z3:
-- Let $S_1$ be 624 32-bit bitvectors.
-- $S_1[0]$ generated the hidden `secret`.
-- $S_1[1 \dots 623]$ generated `something[0 \dots 622]`.
-- $S_2 = \text{twist}(S_1)$.
-- $S_2[0 \dots 342]$ generated `something[623 \dots 965]`.
+- Let `S1` be 624 32-bit bitvectors.
+- `S1[0]` generated the hidden `secret`.
+- `S1[1..623]` generated `something[0..622]`.
+- `S2 = twist(S1)`.
+- `S2[0..342]` generated `something[623..965]`.
 
-Z3 solves $S_1$ in ~13 seconds. However, because $S_2$ only covers 343 outputs, only words $0 \dots 341$ of $S_1$ are constrained. Words $342 \dots 623$ are arbitrary filler chosen by Z3.
+Z3 solves `S1` in ~13 seconds. However, because `S2` only covers 343 outputs, only words 0 to 341 of `S1` are constrained. Words 342 to 623 are arbitrary filler chosen by Z3.
 
 ---
 
 ### 3. The "S0 Unsat" & Inconsistency Trap
-Next, DeepSeek tried to set up a second Z3 solver to untwist $S_1$ backwards to $S_0$ (the state right after `init_by_array`).
+Next, DeepSeek tried to set up a second Z3 solver to untwist `S1` backwards to `S0` (the state right after `init_by_array`).
 
 This repeatedly failed:
-- Running Z3 on all 624 words gave `unsat` because Z3's filler words in $S_1[342..623]$ do not form a mathematically valid MT state.
+- Running Z3 on all 624 words gave `unsat` because Z3's filler words in `S1[342..623]` do not form a mathematically valid MT state.
 - Using `model_completion=True` returned garbage for unconstrained variables, causing `Key inconsistent!` errors when reversing the initialization loops.
 
 ---
@@ -126,19 +126,19 @@ for (i = 227; i < 623; i++) {
 }
 ```
 
-Notice that for $i \ge 227$, the twist reads `mt[i - 227]`. Because the array was updated in-place, index `i - 227` was **already replaced with $S_1$**!
+Notice that for `i >= 227`, the twist reads `mt[i - 227]`. Because the array was updated in-place, index `i - 227` was **already replaced with S1**!
 
-Therefore, for $k \in [228, 341]$:
+Therefore, for `k` in `[228, 341]`:
 ```text
 S1[k] = S1[k - 227] ^ f(y)
 f(y) = S1[k] ^ S1[k - 227]
 ```
 
-Both `k` ($\le 341$) and `k - 227` ($\le 114$) are inside the range of $S_1$ that Z3 already solved accurately. Neither index touches the garbage filler words ($342 \dots 623$)!
+Both `k` (<= 341) and `k - 227` (<= 114) are inside the range of `S1` that Z3 already solved accurately. Neither index touches the garbage filler words (`342..623`)!
 
 ---
 
-### 5. Inverting $f(y)$ and Stitching $S_0$ in Pure Python
+### 5. Inverting f(y) and Stitching S0 in Pure Python
 The twist function is:
 ```text
 f(y) = (y >> 1) ^ (0x9908B0DF if (y & 1) else 0)
@@ -147,14 +147,14 @@ Notice:
 - `(y >> 1)` always has bit 31 equal to 0.
 - The magic constant `0x9908B0DF` has bit 31 equal to 1.
 
-Therefore, bit 31 of $z = S_1[k] \oplus S_1[k - 227]$ directly reveals the parity bit $y \ \& \ 1$!
-We can invert $f(y)$ in one line of Python:
+Therefore, bit 31 of `z = S1[k] ^ S1[k - 227]` directly reveals the parity bit `y & 1`!
+We can invert `f(y)` in one line of Python:
 ```python
 b0 = (z >> 31) & 1
 y = (((z ^ (0x9908B0DF if b0 else 0)) << 1) | b0) & 0xFFFFFFFF
 ```
 
-Then we stitch adjacent $y$ values:
+Then we stitch adjacent `y` values:
 - `y[k]` has the top bit of `S0[k]`.
 - `y[k-1]` has the lower 31 bits of `S0[k]`.
 
@@ -162,7 +162,7 @@ Then we stitch adjacent $y$ values:
 S0[k] = (y[k] & 0x80000000) | (y[k - 1] & 0x7FFFFFFF)
 ```
 
-Starting from $k = 229$ (which avoids the unconstrained $S_1[0]$), this recovers the exact 32-bit values for $S_0[229 \dots 341]$ with zero guessing!
+Starting from `k = 229` (which avoids the unconstrained `S1[0]`), this recovers the exact 32-bit values for `S0[229..341]` with zero guessing!
 
 ---
 
@@ -189,7 +189,7 @@ key[j] = (state_after_loop1[k] - j - (mt_init[k] ^ f1(state_after_loop1[k - 1]))
 ```
 where `j = (k - 1) % 18`.
 
-For $k \in [231, 341]$, `j` cycles through all 18 key indices 6 to 7 times. Every single key candidate matches with 100% agreement.
+For `k` in `[231, 341]`, `j` cycles through all 18 key indices 6 to 7 times. Every single key candidate matches with 100% agreement.
 
 Finally, we pack `key[16]` and `key[17]`:
 ```python
