@@ -2,7 +2,7 @@
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
 > **DeepSeek Chat Session:** [https://chat.deepseek.com/share/pfw85puth4sur5t0sx](https://chat.deepseek.com/share/pfw85puth4sur5t0sx)  
-> **Points:** 450 | **Solves:** 12 | **Category:** Reverse Engineering
+> **Category:** Reverse Engineering
 
 ---
 
@@ -493,15 +493,3 @@ nexsec26{nexsec26{nexsec26{🚩}}}
 ### Captured Flag:
 > `nexsec26{nexsec26{nexsec26{🚩}}}`
 
----
-
-## 7. Key Takeaways & Remediation
-
-1. **Gatekeepers Must Bind Directly to Decryption:**  
-   The primary architectural vulnerability was separating the verification gatekeeper from key derivation. The program verified user input against `TargetHash_E`, but the actual decryption key for the flag *was* that target hash. Because child assembly keys were derived strictly from constant root seeds and path strings, the entire payload structure could be unpacked without ever knowing the password.
-
-2. **Obfuscation Does Not Equal Cryptography:**  
-   Tampering with CLI metadata tokens (such as pointing `InitializeArray` to an invalid signature) breaks simple execution and naive debuggers, but static analyzers like dnSpy, ILSpy, and custom Python parsers remain effective. Obfuscation only delays analysis; it does not protect secrets.
-
-3. **Mind .NET String Internals (`#US`):**  
-   In the CLI specification, string literals in the `#US` heap are always stored in UTF-16LE. When grepping or regexing raw binaries for hexadecimal strings or identifiers, always account for null byte interleaving (`(?:[0-9a-fA-F]\x00){N}`).
