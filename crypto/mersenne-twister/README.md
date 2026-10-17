@@ -1,25 +1,28 @@
 # Mersenne Twister - NexSec 2026 (Crypto)
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
+> **DeepSeek Chat Session:** [https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf)  
 > **Points:** 450 | **Solves:** 12 | **Category:** Crypto
 
 ---
 
 ## 1. Overview & TL;DR
 
-In this challenge, a remote server generates an 8-byte random seed and initializes Python's standard `random.Random(seed)` generator. It draws a 32-bit secret number that it hides from us, and then gives us 966 consecutive random numbers, but with only the upper 16 bits of each number (`x >> 16`). To get the flag, we have to provide both the original 8-byte seed (in hex) and the hidden 32-bit secret.
+In this challenge, we are given a Python script running on a remote server that initializes `random.Random(seed)` with an 8-byte random seed (`randbytes(8)`). The server generates an initial 32-bit secret that it hides from us, followed by 966 consecutive random numbers where each number is truncated to its upper 16 bits (`x >> 16`). We are allowed 3 attempts to submit both the original 8-byte seed in hex and the 32-bit secret.
 
-Because Mersenne Twister (MT19937) operations are bitwise linear (shifts and XORs), I used Z3 to recover the generator's state. But because we only had 966 half-outputs, Z3 could only recover the first 342 words accurately—the rest were arbitrary filler. 
+Standard tools like `randcrack` fail because we only receive 16-bit truncated outputs across two state cycles. Working through the challenge with DeepSeek (see the [chat transcript](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf)), we developed an exploit chain:
 
-By looking at CPython's C source code (`_randommodule.c`), I noticed two crucial things:
-1. CPython stores the raw 64-bit seed directly inside the key array at indices 16 and 17, so we never have to reverse SHA-512.
-2. In CPython's in-place twist, indices 228 to 341 depend only on values we already solved. We can untwist them and reverse the initialization loops in plain Python in under 15 seconds.
+1. **Z3 State Recovery ($S_1$):** Because MT19937 tempering and twisting are bitwise linear, Z3 solves the internal state for the first generation cycle in ~13 seconds.
+2. **Bypassing SHA-512:** While CPython hashes seeds with SHA-512, inspecting `_randommodule.c` reveals that it appends the raw 64-bit seed directly at `key[16]` and `key[17]`.
+3. **The In-Place Twist Trick:** Instead of running into `unsat` errors with a second Z3 solver, we exploit CPython's in-place twist: for indices $k \in [228, 341]$, $S_1[k] \oplus S_1[k - 227]$ gives the twist function $f(y)$ using only values we already solved.
+4. **Single-Line Inversion & Bit Stitching:** Because bit 31 of MT19937's matrix constant `0x9908B0DF` is 1, $f(y)$ is inverted directly in one line. Stitching adjacent $y$ values reconstructs $S_0[229..341]$.
+5. **Reversing `init_by_array`:** We reverse both initialization loops in plain Python in under a millisecond, recover the seed, and grab the flag.
 
 ---
 
 ## 2. Reconnaissance & Initial Analysis
 
-We were provided with `challenge.py` and a remote service running on `nc koala.nexsec.my 36589`.
+The challenge provided `challenge.py` and a remote service running on `nc koala.nexsec.my 36589`.
 
 ### Source Code
 
@@ -62,83 +65,60 @@ for _ in range(3):
         print("Try again, please be careful")
 ```
 
-### Breaking Down the Numbers:
-- `standart // 20 - 32` gives `(624 * 32) // 20 - 32 = 966` outputs.
-- Each number is truncated: only the top 16 bits (`x >> 16`) are leaked.
-- The standard MT19937 state has 624 words of 32 bits each (19,968 bits total).
-- We receive `966 * 16 = 15,456` bits of data across two generator cycles.
-- Off-the-shelf tools like `randcrack` do not work here because they require 624 full, untruncated 32-bit integers from a single cycle.
+### Initial Observations:
+- Output count: `(624 * 32) // 20 - 32 = 966` values.
+- Each value is truncated: only `x >> 16` is leaked.
+- An MT19937 state is 624 32-bit words (19,968 bits).
+- We receive `966 * 16 = 15,456` bits total.
+- Since 966 is greater than 624, the generator produces 623 outputs from State 1 ($S_1$) and twists in-place to State 2 ($S_2$) to produce the remaining 343 outputs.
 
 ---
 
-## 3. Vulnerability Analysis (Root Cause)
+## 3. The Journey with DeepSeek & Root Cause Analysis
 
-### 1. MT19937 is Linear
-Python's default PRNG is MT19937. Every step of output tempering uses bitwise XOR and bit shifts with constant masks:
+*(Documented step-by-step in the [DeepSeek conversation](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf))*
 
-```python
-y = mt[i]
-y ^= (y >> 11)
-y ^= (y << 7) & 0x9D2C5680
-y ^= (y << 15) & 0xEFC60000
-y ^= (y >> 18)
-```
+### 1. The SHA-512 Roadblock (and how we bypassed it)
+Early in the chat, DeepSeek warned that recovering the 8-byte seed would require inverting SHA-512, because CPython hashes seeds with SHA-512 when initializing `Random(seed)`.
 
-Because these operations only involve XOR and shifts, each output bit is simply a linear combination (over GF(2)) of the internal state bits. This makes it a great fit for a SAT/SMT solver like Z3.
-
-### 2. Rabbit Hole: The 64-bit Seed and SHA-512
-My first thought was: can we just brute force the seed?
-No, the seed is 8 random bytes (64 bits), which means 2^64 possibilities. That is way too big to brute-force.
-
-My second worry was: when Python seeds `Random(seed)` with bytes, does it hash them?
-Looking into CPython's `Modules/_randommodule.c`, when you pass bytes, Python converts them into an integer and then calls `init_by_array`:
-- If the integer is longer than 32 bits, CPython computes a SHA-512 hash of the seed, producing 16 32-bit words (64 bytes).
-- **Crucial Discovery:** CPython then takes the original integer and appends its chunks right after the hash!
-
+However, looking into CPython's `Modules/_randommodule.c`:
 ```c
-/* In CPython's _randommodule.c */
-key[0..15] = sha512_digest_words;
-key[16]    = seed_chunk_0;  // lower 32 bits of our seed
-key[17]    = seed_chunk_1;  // upper 32 bits of our seed
+/* In CPython's _randommodule.c: random_seed() */
+key = (uint32_t *)PyMem_Malloc(key_length * sizeof(uint32_t));
+
+/* CPython computes SHA-512 of the seed, storing 16 words (64 bytes) */
+/* BUT THEN appends the original integer's raw 32-bit words at the end! */
+key[16] = seed_chunk_0;  // lower 32 bits of our seed
+key[17] = seed_chunk_1;  // upper 32 bits of our seed
 ```
 
-This was a huge relief: we don't have to invert SHA-512! If we can recover `key[16]` and `key[17]`, we have the original seed.
+This was the first breakthrough: CPython's key buffer has 18 words. Words 0 to 15 are the SHA-512 digest, but words 16 and 17 are the raw 64-bit seed in little-endian! If we can recover `key[16]` and `key[17]`, we bypass SHA-512 completely.
 
 ---
 
-## 4. Exploitation Walkthrough
+### 2. Solving State 1 ($S_1$) with Z3
+Because MT19937 tempering and twisting are bitwise linear (shifts and XORs), we can model the generator in Z3:
+- Let $S_1$ be 624 32-bit bitvectors.
+- $S_1[0]$ generated the hidden `secret`.
+- $S_1[1 \dots 623]$ generated `something[0 \dots 622]`.
+- $S_2 = \text{twist}(S_1)$.
+- $S_2[0 \dots 342]$ generated `something[623 \dots 965]`.
 
-### Phase 1: Solving the First State (S1) with Z3
-
-Let `S1` be the 624-word state after `secret = rng.getrandbits(32)` is generated:
-- Word 0 generates `secret` (which we don't see).
-- Words 1 to 623 generate the first 623 leaked outputs (`something[0..622]`).
-- At output 624, the state twists in-place to `S2`.
-- Words 0 to 342 of `S2` generate the remaining 343 outputs (`something[623..965]`).
-
-We set up Z3 with 624 32-bit bitvectors for `S1`, simulate the twist to get `S2`, and constrain the top 16 bits to match `something`:
-
-```python
-for i in range(623):
-    solver.add(LShR(temper(S1[i + 1]), 16) == something[i])
-
-for i in range(len(something) - 623):
-    solver.add(LShR(temper(S2[i]), 16) == something[623 + i])
-```
-
-Z3 solves this in about 12 seconds.
-
-However, because `S2` only covers 343 outputs, only words 0 to 341 of `S1` are constrained. Words 342 to 623 are arbitrary filler chosen by Z3.
+Z3 solves $S_1$ in ~13 seconds. However, because $S_2$ only covers 343 outputs, only words $0 \dots 341$ of $S_1$ are constrained. Words $342 \dots 623$ are arbitrary filler chosen by Z3.
 
 ---
 
-### Phase 2: Untwisting Without Full State (Recovering S0)
+### 3. The "S0 Unsat" & Inconsistency Trap
+Next, DeepSeek tried to set up a second Z3 solver to untwist $S_1$ backwards to $S_0$ (the state right after `init_by_array`).
 
-To get the seed, we need to go backwards from `S1` to `S0` (the state right after `init_by_array`).
+This repeatedly failed:
+- Running Z3 on all 624 words gave `unsat` because Z3's filler words in $S_1[342..623]$ do not form a mathematically valid MT state.
+- Using `model_completion=True` returned garbage for unconstrained variables, causing `Key inconsistent!` errors when reversing the initialization loops.
 
-If we try to untwist the whole array with Z3, it gives `unsat` because the filler words in `S1[342..623]` do not make a valid Mersenne Twister state.
+---
 
-But look at how CPython does the in-place twist:
+### 4. The In-Place Twist Breakthrough
+Looking at CPython's actual in-place twist implementation:
 ```c
 for (i = 227; i < 623; i++) {
     y = (mt[i] & 0x80000000) | (mt[i + 1] & 0x7FFFFFFF);
@@ -146,95 +126,90 @@ for (i = 227; i < 623; i++) {
 }
 ```
 
-For index `k` between 228 and 341:
+Notice that for $i \ge 227$, the twist reads `mt[i - 227]`. Because the array was updated in-place, index `i - 227` was **already replaced with $S_1$**!
+
+Therefore, for $k \in [228, 341]$:
 ```text
 S1[k] = S1[k - 227] ^ f(y)
 f(y) = S1[k] ^ S1[k - 227]
 ```
 
-Notice:
-- `k` is between 228 and 341 (already solved by Z3).
-- `k - 227` is between 1 and 114 (already solved by Z3).
+Both `k` ($\le 341$) and `k - 227` ($\le 114$) are inside the range of $S_1$ that Z3 already solved accurately. Neither index touches the garbage filler words ($342 \dots 623$)!
 
-Both values are 100% known and contain zero filler!
+---
 
-#### Inverting f(y) in Plain Python:
+### 5. Inverting $f(y)$ and Stitching $S_0$ in Pure Python
 The twist function is:
 ```text
 f(y) = (y >> 1) ^ (0x9908B0DF if (y & 1) else 0)
 ```
-Notice that `(y >> 1)` always has bit 31 equal to 0. 
-The constant `0x9908B0DF` has bit 31 equal to 1.
-So bit 31 of `z = S1[k] ^ S1[k - 227]` tells us `y & 1` immediately without any guessing!
+Notice:
+- `(y >> 1)` always has bit 31 equal to 0.
+- The magic constant `0x9908B0DF` has bit 31 equal to 1.
 
+Therefore, bit 31 of $z = S_1[k] \oplus S_1[k - 227]$ directly reveals the parity bit $y \ \& \ 1$!
+We can invert $f(y)$ in one line of Python:
 ```python
 b0 = (z >> 31) & 1
 y = (((z ^ (0x9908B0DF if b0 else 0)) << 1) | b0) & 0xFFFFFFFF
 ```
 
-#### Reconstructing S0[k]:
-By definition of the twist:
-- `y[k]` holds the top bit of `S0[k]` and lower 31 bits of `S0[k+1]`.
-- `y[k-1]` holds the top bit of `S0[k-1]` and lower 31 bits of `S0[k]`.
+Then we stitch adjacent $y$ values:
+- `y[k]` has the top bit of `S0[k]`.
+- `y[k-1]` has the lower 31 bits of `S0[k]`.
 
-Combining the top bit from `y[k]` and the bottom 31 bits from `y[k-1]` gives the exact 32-bit word:
 ```python
 S0[k] = (y[k] & 0x80000000) | (y[k - 1] & 0x7FFFFFFF)
 ```
 
-Starting from `k = 229` (so that `k - 227 >= 2`, avoiding the unconstrained `S1[0]`), we get the exact values for `S0[229..341]`.
+Starting from $k = 229$ (which avoids the unconstrained $S_1[0]$), this recovers the exact 32-bit values for $S_0[229 \dots 341]$ with zero guessing!
 
 ---
 
-### Phase 3: Reversing init_by_array in Pure Python
+### 6. Reversing `init_by_array` Without Z3
+`init_by_array` runs two forward loops:
 
-CPython's `init_by_array` has two sequential loops. We can step backwards through both of them purely in Python:
-
-#### 1. Reversing Loop 2:
-In CPython, each step of Loop 2 computes:
+**Loop 2:**
 ```text
 mt[i] = (mt[i] ^ f2(mt[i-1])) - i
 ```
-In the forward loop, `mt[i-1]` was already modified in the previous iteration, which means it is simply `S0[k-1]`.
-To undo it:
+In the forward loop, `mt[i-1]` was already modified in the previous step, so it is just `S0[k-1]`.
+We reverse it sequentially:
 ```python
 state_after_loop1[k] = ((S0[k] + k) & 0xFFFFFFFF) ^ f2(S0[k - 1])
 ```
-This only needs `S0[k]` and `S0[k-1]`, which we already know for `k >= 230`!
 
-#### 2. Reversing Loop 1:
-Similarly, each step of Loop 1 computes:
+**Loop 1:**
 ```text
 mt[i] = (mt_init[i] ^ f1(mt[i-1])) + key[j] + j
 ```
-To undo it:
+We reverse it:
 ```python
 key[j] = (state_after_loop1[k] - j - (mt_init[k] ^ f1(state_after_loop1[k - 1]))) & 0xFFFFFFFF
 ```
 where `j = (k - 1) % 18`.
 
-For `k` between 231 and 341, `(k - 1) % 18` cycles through all 18 key indices 6 to 7 times. Every single candidate matches 100% consistently!
+For $k \in [231, 341]$, `j` cycles through all 18 key indices 6 to 7 times. Every single key candidate matches with 100% agreement.
 
-#### 3. Extracting Seed & Secret:
-We pull out `key[16]` and `key[17]`:
+Finally, we pack `key[16]` and `key[17]`:
 ```python
 seed_bytes = struct.pack(">2I", key[17], key[16])
 seed_hex = seed_bytes.hex()
 ```
-
-Then we initialize a local `Random(seed_bytes)` and call `getrandbits(32)` to get the secret.
+And calculate `secret = random.Random(seed_bytes).getrandbits(32)`.
 
 ---
 
-## 5. Solve Script
+## 4. Solve Script
 
-Here is the complete script (`solve.py`):
+Here is the final standalone solve script (`solve.py`):
 
 ```python
 #!/usr/bin/env python3
 """
 NexSec 2026 - Mersenne Twister Solve Script
 Author: klasyyi
+DeepSeek Session: https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf
 """
 
 import socket
@@ -248,7 +223,7 @@ from z3 import *
 # ==============================================================================
 
 def invert_f(z):
-    """Undo the twist function f(y) in one step."""
+    """Invert f(y) using the bit-31 parity trick."""
     A = 0x9908b0df
     b0 = (z >> 31) & 1
     mag = A if b0 else 0
@@ -270,6 +245,7 @@ def init_genrand(s):
     return mt
 
 def twist_linear_inplace(mt):
+    """Linear model of CPython's in-place MT19937 twist."""
     N, M, A = 624, 397, 0x9908b0df
     next_mt = list(mt)
     for i in range(N - M):
@@ -324,11 +300,11 @@ def solve_server(host, port):
     S1 = [BitVec(f"s1_{i}", 32) for i in range(624)]
     solver = Solver()
 
-    # S1 outputs (outputs 1..623)
+    # S1 outputs (words 1..623)
     for i in range(623):
         solver.add(LShR(temper(S1[i + 1]), 16) == something[i])
 
-    # S2 outputs (outputs 624..965)
+    # S2 outputs (words 0..342)
     S2 = twist_linear_inplace(S1)
     for i in range(len(something) - 623):
         solver.add(LShR(temper(S2[i]), 16) == something[623 + i])
@@ -353,12 +329,12 @@ def solve_server(host, port):
         lower_31 = y_vals[k - 1] & 0x7fffffff
         recovered_s0[k] = top_bit | lower_31
 
-    # 3. Reverse Loop 2
+    # 3. Reverse Loop 2 of init_by_array
     s0_loop1 = {}
     for k in range(230, 342):
         s0_loop1[k] = ((recovered_s0[k] + k) & 0xffffffff) ^ f2(recovered_s0[k - 1])
 
-    # 4. Reverse Loop 1
+    # 4. Reverse Loop 1 of init_by_array
     mt_init = init_genrand(19650218)
     recovered_keys = {}
     for k in range(231, 342):
@@ -379,7 +355,7 @@ def solve_server(host, port):
     print(f"[+] Recovered Seed (hex): {seed_hex}")
     print(f"[+] Recovered Secret:     {secret}")
 
-    # Send to server
+    # Send answers to server
     print("[*] Sending answers to server...")
     s.sendall(seed_hex.encode() + b"\n")
     time.sleep(0.5)
@@ -407,9 +383,9 @@ if __name__ == "__main__":
 
 ---
 
-## 6. Flag & Verification
+## 5. Flag & Verification
 
-Running `python solve.py`:
+Running `python solve.py` against `nc koala.nexsec.my 36589`:
 
 ```text
 $ python solve.py
@@ -427,21 +403,14 @@ Secret: nexsec26{w0w_y0u_already_kn0w_Mersenne_Twister_nice_0fed2f1a9dd2c3c276cc
 ----------------------------------------------------------------
 ```
 
-### Flag:
+### Final Flag:
 > `nexsec26{w0w_y0u_already_kn0w_Mersenne_Twister_nice_0fed2f1a9dd2c3c276cc24a2461c377486ca88acce79ef488023ce18c5abf4c4}`
 
 ---
 
-## 7. Key Takeaways & Remediation
+## 6. Key Takeaways
 
 1. **MT19937 is Not Cryptographically Secure:**
-   The Mersenne Twister is designed for speed and statistical randomness, not security. Because twisting and tempering are bitwise linear, truncated outputs can easily be reconstructed using SAT solvers like Z3.
-   
-   To generate tokens, keys, or secrets securely in Python, always use the `secrets` module:
-   ```python
-   import secrets
-   secure_token = secrets.token_bytes(32)
-   ```
-
-2. **Always Check the Underlying C Implementation:**
-   Looking into CPython's `_randommodule.c` was the breakthrough for this challenge. Even though Python hashes large seeds with SHA-512, it appends the raw seed at the end of the key array, making SHA-512 completely irrelevant to the attack.
+   Mersenne Twister is designed for statistical simulation, not cryptography. Truncated outputs can be modeled as linear systems over GF(2) and solved in seconds with Z3. For security-sensitive applications, always use `secrets.token_bytes()`.
+2. **Implementation Details Matter:**
+   Looking into CPython's source code was what solved the challenge. While `random_seed` hashes large seeds with SHA-512, it appends the raw seed at the end of the key array (`key[16..17]`), completely bypassing the one-way hash.
