@@ -1,7 +1,8 @@
 # n8n - NexSec 2026 (Forensics)
 
-> **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
-> **Points:** 450 | **Solves:** 8 | **Category:** Forensics  
+> **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)
+> **DeepSeek Chat Session:** [https://chat.deepseek.com/share/jd8mnm2z53dzbu8k7x](https://chat.deepseek.com/share/jd8mnm2z53dzbu8k7x)
+> **Category:** Forensics  
 
 ---
 
@@ -475,21 +476,3 @@ Flag: nexsec26{cdc591a76a6e05f352ed8953ec5e4a3e_73a445347755d6e0977620a900f75b24
 > nexsec26{cdc591a76a6e05f352ed8953ec5e4a3e_73a445347755d6e0977620a900f75b24a5e7e82c424c1123f240c59c396eeed0}
 > ```
 
----
-
-## 7. Key Takeaways & Remediation
-
-### Remediation & Defense
-1. **Container Hardening:**
-   - **Drop `CAP_SYS_ADMIN`:** Never run containers with `--privileged` or `CAP_SYS_ADMIN` unless strictly necessary.
-   - **Use cgroups v2:** Modern Linux deployments using cgroups v2 do not support `release_agent`, effectively closing this escape vector.
-   - **Rootless Containers:** Deploy containers with user namespaces (e.g., Podman or Docker Rootless) so that container `root` is mapped to an unprivileged user on the host.
-2. **Application Security:**
-   - Update n8n past version 1.70.0 to remediate expression sandbox escapes.
-   - Implement rate-limiting and MFA on external-facing management panels.
-3. **Host-Level Detection:**
-   - Monitor the creation of untracked systemd timers and service units in `/etc/systemd/system/` using auditd or file integrity monitoring (FIM).
-
-### Technical Lessons
-- **Physical Memory Preserves Network Traffic:** Network interface ring buffers (`sk_buff`) in the Linux kernel frequently hold unencrypted or encrypted packets long after connections terminate. Carving raw IP/TCP packets directly from RAM is a powerful technique when no packet capture (`.pcap`) exists.
-- **Resilience Against Tooling Failures:** When complex framework tools like Volatility fail due to missing kernel symbols, falling back on custom streaming binary regex parsers and structure carving is both faster and more reliable.
