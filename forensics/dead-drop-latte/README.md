@@ -1,7 +1,7 @@
 # Dead Drop Latte - NexSec 2026 (Forensics)
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
-> **Points:** 450 | **Solves:** 18 | **Category:** Forensics
+> **Category:** Forensics
 
 ---
 
@@ -415,16 +415,3 @@ The flag is contained in the telemetry JSON note of sequence #3:
 nexsec26{l3ts_buy_s0me_c0ffee_2_stay_awake}
 ```
 
----
-
-## 7. Key Takeaways & Remediation
-
-### Attack Vector Analysis
-* **Bypassing Web Gateway Protections:** The ClickFix technique abuses human user trust to transfer a malicious command into an administrative or native OS prompt (`Win + R`), bypassing browser download controls and MOTW (Mark of the Web) tagging.
-* **Resilient C2 through Dead Drops:** Attackers increasingly abuse legitimate infrastructure (DNS TXT records, GitHub gists, Telegram channels, Pastebin) as dead-drop resolvers to shield their real C2 servers from static network signatures and domain takedowns.
-
-### Defensive Countermeasures
-1. **Attack Surface Reduction (ASR):** Enable Windows Defender ASR rules to block child processes spawned by Office/browsers and prevent unprivileged PowerShell script execution from `%TEMP%`.
-2. **Constrained Language Mode & AppLocker:** Enforce PowerShell ConstrainedLanguageMode and implement WDAC (Windows Defender Application Control) / AppLocker to restrict execution to signed enterprise binaries.
-3. **Egress Filtering:** Strictly restrict outbound traffic from corporate endpoints. Workstations should never be allowed to establish outbound HTTP/TCP connections directly to non-standard ports (`8080`, `8081`, `8088`, `8089`) without passing through an authenticating proxy.
-4. **DNS Telemetry & Anomaly Detection:** Monitor enterprise DNS resolver logs for high volumes of `TXT` queries to unusual or newly registered apex domains. High-entropy `TXT` records are a reliable indicator of C2 dead drops or DNS tunneling.
