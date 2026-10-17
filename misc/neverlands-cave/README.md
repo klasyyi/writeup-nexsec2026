@@ -2,7 +2,7 @@
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
 > **DeepSeek Chat Session:** [https://chat.deepseek.com/share/2uv3561mo631dw4eha](https://chat.deepseek.com/share/2uv3561mo631dw4eha)  
-> **Points:** TBD | **Solves:** TBD | **Category:** Misc (Cloud / Kubernetes)
+> **Category:** Misc
 
 ---
 
@@ -668,44 +668,3 @@ $ python3 solve.py
 
 > **Captured Flag:**  
 > `nexsec26{36baf731dca4f297792520080e5a26fe}`
-
-*(Note: Flags are dynamically generated per provisioned team environment. Re-running the exploit verifies that the exploit path is completely deterministic).*
-
----
-
-## 7. Key Takeaways & Remediation
-
-### Secure Coding Practices & Remediation
-
-1. **Strict Protocol Whitelisting:**  
-   Remove `file://` from the allowed URL schemes. Server-side fetchers should restrict protocols strictly to `http` and `https`:
-   ```python
-   # Patch: Disallow file:// and non-web schemes
-   ALLOWED_SCHEMES = {"http", "https"}
-   if scheme not in ALLOWED_SCHEMES:
-       return jsonify(error="Invalid protocol"), 400
-   ```
-
-2. **Network-Layer Egress Controls & SSRF Defenses:**  
-   Resolving DNS hostnames before socket connection and strictly denying private and internal IP ranges:
-   - Loopback (`127.0.0.0/8`)
-   - RFC 1918 Private Ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`)
-   - Link-local and Cloud Metadata Services (`169.254.169.254`, `100.100.100.200`)
-   - Kubernetes cluster IP ranges (`.svc.cluster.local`)
-
-3. **Enforce Alibaba Cloud IMDS Hardened Mode:**  
-   Migrate worker nodes to IMDSv2 (Hardened Mode). This requires an authenticated HTTP `PUT` request with a security token header (`X-aliyun-ecs-metadata-token`) to read instance metadata, preventing trivial blind SSRF exploitation.
-
-4. **Zero-Trust Kubernetes NetworkPolicies:**  
-   The internal broker (`broker.spot-control.svc.cluster.local:8080`) should not be reachable by edge-facing ingress or web pods. Enforce Kubernetes `NetworkPolicy` objects that limit ingress to authorized management namespaces.
-
-5. **Principle of Least Privilege (PoLP) in RAM/RRSA Roles:**  
-   Granting broad `RunCommand` permissions to workloads creates excessive blast radius. Administrative command execution must require separate multi-factor authentication or restricted operator roles rather than pod-assumable identities.
-
----
-
-### Technical Lessons Learned
-
-* **Differentiating STS Authentication Flows:** Not all STS API calls require request signing. `AssumeRoleWithOIDC` is designed to be invoked by workloads prior to holding an active `AccessKeyId`/`AccessKeySecret` pair. The projected OIDC JWT acts as the sole cryptographic credential; the only mandatory metadata is an ISO 8601 `Timestamp`.
-* **OSS Canonical Header Inclusion:** When signing requests against Alibaba Cloud OSS with temporary credentials, `x-oss-security-token` must be treated as a canonicalized OSS header (`CanonicalizedOSSHeaders`) and sorted lexicographically within the `StringToSign`. Omitting it triggers silent HMAC verification mismatches (`SignatureDoesNotMatch`).
-* **Interpreting Negative Recon Findings:** When an identified string (e.g., `cave-acc6ca6a.txt`) fails to appear on the local filesystem, correlating it with previously leaked cloud resources (such as OSS bucket parameters in `/proc/self/environ`) prevents stalling on dead ends and reveals the true cloud-native storage architecture.
