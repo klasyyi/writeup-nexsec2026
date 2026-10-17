@@ -114,7 +114,9 @@ IL_0045: // Loop test
 ```
 
 The method allocates a 489-byte buffer, initializes it from raw PE data, and decodes every byte:
-$$\text{dec}[i] = \text{raw}[i] \oplus (i \ \& \ \text{0xFF}) \oplus \text{0xAA}$$
+```text
+dec[i] = raw[i] ^ (i & 0xFF) ^ 0xAA
+```
 
 Inspecting the `FieldRVA` table (Table `0x1D`) showed token `0x0400000A` mapped to RVA `0x3B6A0` (file offset `0x398A0` in the `.text` section). I wrote a Python script to carve and decode the 489 bytes:
 
@@ -137,7 +139,10 @@ Inspecting the `FieldRVA` table (Table `0x1D`) showed token `0x0400000A` mapped 
 ### 3.2 The Flawed Cryptographic Gatekeeper
 
 In `A.A..cctor()`, the binary derives a master root key by XORing the three 32-byte hashes:
-$$\text{Key}_{\text{root}} = \text{Hex}(c()) \oplus \text{Hex}(D()) \oplus \text{Hex}(d()) = \texttt{2ea52ce4a14764d705c6245bdaf982c0a366588ba34351f5b3698bbf5c69d960}$$
+```text
+Key_root = Hex(c()) ^ Hex(D()) ^ Hex(d())
+         = 2ea52ce4a14764d705c6245bdaf982c0a366588ba34351f5b3698bbf5c69d960
+```
 
 Next, I analyzed the main verification and doll-dispatching logic:
 
@@ -187,7 +192,9 @@ void Method9(bool needed, string resName, string dollId, byte[] parentKey, strin
 
 **The Vulnerability:**  
 The 16-character password `pw` is **never used to derive the decryption keys of the nested dolls**. The child key is derived deterministically from:
-$$\text{Key}_{\text{child}} = \text{SHA256}(\text{Key}_{\text{parent}} \mathbin{\Vert} \text{ASCII}(\text{childPath}))$$
+```text
+Key_child = SHA256(Key_parent || ASCII(childPath))
+```
 
 Furthermore, the flag decryption method in the leaf dolls was defined as:
 ```csharp
@@ -196,7 +203,7 @@ string DecryptFlag(string pw) {
     return Encoding.UTF8.GetString(DecryptAES(FromHex(FLAG_ENC), key));
 }
 ```
-Because the binary requires $\text{SHA256}(pw) == \text{TargetHash\_E}$, the AES key for the flag is already known: it is literally `TargetHash_E` (`77aa4d230ca1...`). There was no need to crack the 16-character password to unpack the payloads or decrypt the flag.
+Because the binary requires `SHA256(pw) == TargetHash_E`, the AES key for the flag is already known: it is literally `TargetHash_E` (`77aa4d230ca1...`). There was no need to crack the 16-character password to unpack the payloads or decrypt the flag.
 
 ---
 
@@ -205,8 +212,8 @@ Because the binary requires $\text{SHA256}(pw) == \text{TargetHash\_E}$, the AES
 ### Phase 1: Decrypting the First Layer (`doll-0` and `doll-1`)
 
 Extracting the embedded resources `doll-0` and `doll-1` from `matryoshka.exe` and applying AES-256-CBC with keys:
-* $K_0 = \text{SHA256}(\text{Key}_{\text{root}} \mathbin{\Vert} \text{"0"})$
-* $K_1 = \text{SHA256}(\text{Key}_{\text{root}} \mathbin{\Vert} \text{"1"})$
+* `K_0 = SHA256(Key_root || "0")`
+* `K_1 = SHA256(Key_root || "1")`
 
 Both payloads cleanly decrypted into valid PE32 .NET DLL files (`decrypted_doll-0.dll` and `decrypted_doll-1.dll`).
 
@@ -233,7 +240,7 @@ namespace Matryoshka
 }
 ```
 
-The challenge implements a **binary tree of depth 4** ($2^4 = 16$ leaves):
+The challenge implements a **binary tree of depth 4** (2⁴ = 16 leaves):
 * **Level 0 (Root):** `matryoshka.exe` branches on bit 0 of password characters.
 * **Level 1:** `doll-0` and `doll-1` branch on bit 1.
 * **Level 2:** 4 dolls (`doll-00`, `doll-01`, `doll-10`, `doll-11`) branch on bit 2.
@@ -292,9 +299,11 @@ nexsec26{nexsec26{nexsec26{🚩}}}
 ### Bonus: Recovering the 16-Character Password
 
 Although not strictly required, each leaf doll verified characters using HMAC-SHA256:
-$$\text{HMAC-SHA256}(K_{\text{leaf}}, [\text{index}, \text{ASCII}(c)]) == \text{target\_hmac}$$
+```text
+HMAC-SHA256(K_leaf, [index, ASCII(c)]) == target_hmac
+```
 
-Because each index was tested across only 95 printable ASCII characters ($0\times20 - 0\times7\text{E}$), I brute-forced all 16 characters in under a second:
+Because each index was tested across only 95 printable ASCII characters (`0x20` - `0x7E`), I brute-forced all 16 characters in under a second:
 
 ```text
 Leaf doll '0000': index 11 -> 'P'
@@ -316,10 +325,14 @@ Leaf doll '1111': index 13 -> 'o'
 ```
 
 Ordering the characters by index yielded:
-$$\mathbf{pw = \texttt{"rhkaDwfinMePcolz"}}$$
+```text
+pw = "rhkaDwfinMePcolz"
+```
 
 Verifying against the target hash:
-$$\text{SHA256}(\texttt{"rhkaDwfinMePcolz"}) = \texttt{77aa4d230ca164172ea2c972e207cb93dae2d0bd5e5fd3234ff4b5ea8874e345} \quad (\checkmark)$$
+```text
+SHA256("rhkaDwfinMePcolz") == 77aa4d230ca164172ea2c972e207cb93dae2d0bd5e5fd3234ff4b5ea8874e345  [MATCH]
+```
 
 ---
 
