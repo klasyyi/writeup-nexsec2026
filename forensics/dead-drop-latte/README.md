@@ -1,6 +1,7 @@
 # Dead Drop Latte - NexSec 2026 (Forensics)
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
+> **DeepSeek Chat Session:** [https://chat.deepseek.com/share/0izrlmc9invir9zffr](https://chat.deepseek.com/share/0izrlmc9invir9zffr)
 > **Category:** Forensics
 
 ---
