@@ -2,7 +2,7 @@
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
 > **DeepSeek Chat Session:** [https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf)  
-> **Points:** 450 | **Solves:** 12 | **Category:** Crypto
+> **Category:** Crypto
 
 ---
 
