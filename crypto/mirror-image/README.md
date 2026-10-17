@@ -2,7 +2,7 @@
 
 > **Repository:** [klasyyi/writeup-nexsec2026](https://github.com/klasyyi/writeup-nexsec2026)  
 > **DeepSeek Chat Session:** [https://chat.deepseek.com/share/uk97mksa8d2tucubvz](https://chat.deepseek.com/share/uk97mksa8d2tucubvz)  
-> **Points:** 450 | **Solves:** 14 | **Category:** Crypto
+> **Category:** Crypto
 
 ---
 
@@ -223,10 +223,3 @@ Running `solve.py` against the challenge server:
 > **Flag:**  
 > `nexsec26{YOU_WILL_NEVER_CATCH_ME_HIDING_BETWEEN_ALL_OF_THESE_MIRRORS_D20_I_CAST_MIRROR_IMAGE_b0ee1ac48ad31cb4ad5e6365759c5b6ab274b884e9edc5c8b88341bd17ea6b34}`
 
----
-
-## 7. Key Takeaways & Remediation
-
-- **Remediation**: If the author reduced `MIRRORS` so that $\prod m_i < 2^{1024}$, the modular relations would not uniquely constrain $s$ over $\mathbb{Z}$, breaking the exact CRT knapsack.
-- **Bit-Truncation Trick**: In modular equations with a bounded secret $s < 2^B$, dividing by $2^B$ forces $\lfloor s / 2^B \rfloor = 0$, completely removing the unknown variable and exposing a clean low-density knapsack.
-- **Keep Lattice Weights Uniform**: Never inflate lattice embedding weights unnecessarily. Setting the embedding coordinate to 1 balances all coordinates to $O(1)$, letting LLL detect the short vector effortlessly.
