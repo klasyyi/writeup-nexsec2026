@@ -8,7 +8,7 @@
 
 ## 1. Overview & TL;DR
 
-In **Mirror Image**, a remote server generates a random 1024-bit secret $s$, picks 112 16-bit prime moduli $m_i$, and gives us two possible residues per mirror: the true residue $s \bmod m_i$ and a fake one. At the end, it encrypts the flag using AES-GCM with key $\text{SHA-256}(s)$.
+In **Mirror Image**, a remote server generates a random 1024-bit secret $s$, picks 112 16-bit prime moduli $m_i$, and gives us two possible residues per mirror: the true residue $s \bmod m_i$ and a fake one. At the end, it encrypts the flag using AES-GCM with key `SHA-256(s)`.
 
 ### TL;DR
 Brute-forcing $2^{112}$ shadow combinations is impossible. However, the product of the primes $M = \prod m_i \approx 2^{1743}$ is much larger than $s < 2^{1024}$. Writing the Chinese Remainder Theorem (CRT) sum over integers gives $A + \sum e_i U_i - kM = s$ with $e_i \in \{0, 1\}$. By dividing the whole equation by $2^{1024}$, the unknown secret $s$ drops to $0$ ($\lfloor s / 2^{1024} \rfloor = 0$). This leaves a low-density subset-sum problem over 719-bit integers that LLL solves in under 2 seconds.
@@ -21,7 +21,7 @@ We are given `challenge.py` and a remote netcat service.
 
 ### Challenge Logic
 1. Generates 112 primes $m_i \in [2^{15}, 2^{16})$.
-2. Picks secret $s = \text{randbits}(1024)$.
+2. Picks secret `s = randbits(1024)`.
 3. For each mirror, prints $(m_i, (r_{i,0}, r_{i,1}))$, where one residue is $s \bmod m_i$ and the other is random.
 4. Encrypts `flag.txt` with AES-GCM using `key = sha256(s.to_bytes(128, 'big')).digest()` and prints `ward = (nonce, ciphertext)`.
 
@@ -101,10 +101,10 @@ where $|\epsilon| \approx 10$ is the tiny truncation error from the floors.
 The target vector is **14 times shorter** than any random vector in the lattice. LLL finds it on **Row 0** instantly.
 
 ### 3. Extracting $s$ & Decrypting
-1. Check Row 0 for coordinates in $\{0, 1\}$ (or $\{0, -1\}$ if negated).
+1. Check Row 0 for coordinates in `{0, 1}` (or `{0, -1}` if negated).
 2. Set $e_i$ accordingly and reconstruct:
    $$s = \left(A + \sum_{i=0}^{111} e_i U_i\right) \bmod M$$
-3. Derive AES key: $\text{key} = \text{SHA-256}(s.\text{to\_bytes}(128, \text{'big'}))$.
+3. Derive the AES key: `key = sha256(s.to_bytes(128, "big")).digest()`.
 4. Decrypt the ward ciphertext using AES-GCM.
 
 ---
