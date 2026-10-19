@@ -8,7 +8,7 @@ Repository containing writeups and solve scripts for **NexSec CTF 2026**.
 | :--- | :--- | :--- | :--- |
 | **Forensics** | Dead Drop Latte | [Writeup & Exploit](forensics/dead-drop-latte/) | [DeepSeek Session](https://chat.deepseek.com/share/0izrlmc9invir9zffr) |
 | **Forensics** | n8n | [Writeup & Exploit](forensics/n8n/) | [DeepSeek Session](https://chat.deepseek.com/share/jd8mnm2z53dzbu8k7x) |
-| **Crypto** | Mersenne Twister | [Writeup & Exploit](crypto/mersenne-twister/) | [DeepSeek Session](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf) |
+| **Crypto** | Paradise | [Writeup & Exploit](crypto/mersenne-twister/) | [DeepSeek Session](https://chat.deepseek.com/share/2e0hdtt83v6ocj9iqf) |
 | **Crypto** | Mirror Image | [Writeup & Exploit](crypto/mirror-image/) | [DeepSeek Session](https://chat.deepseek.com/share/uk97mksa8d2tucubvz) |
 | **Reverse** | матрёшка (Matryoshka) | [Writeup & Exploit](reverse/matryoshka/) | [DeepSeek Session](https://chat.deepseek.com/share/pfw85puth4sur5t0sx) |
 | **Misc** | Antivist | [Writeup](misc/Antivist/) | [DeepSeek Session](https://chat.deepseek.com/share/80ksxx3a2gtqfhboj2) |
